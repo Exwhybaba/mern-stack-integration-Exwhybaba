@@ -8,7 +8,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 // Import routes
-const postRoutes = require('./routes/posts');
+const postRoutes = require('./routes/post');
 const categoryRoutes = require('./routes/categories');
 const authRoutes = require('./routes/auth');
 
