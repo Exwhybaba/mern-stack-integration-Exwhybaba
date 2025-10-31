@@ -6,11 +6,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 
 // Import routes
 const postRoutes = require('./routes/post');
+const uploadRoutes = require('./routes/upload');
 const categoryRoutes = require('./routes/categories');
 const authRoutes = require('./routes/auth');
+const Category = require('./models/Category');
 
 // Load environment variables
 dotenv.config();
@@ -24,8 +27,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Ensure uploads directory exists and serve static files
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Log requests in development mode
 if (process.env.NODE_ENV === 'development') {
@@ -39,6 +46,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -59,6 +67,23 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
+    // Seed default categories if none exist
+    (async () => {
+      try {
+        const count = await Category.countDocuments();
+        if (count === 0) {
+          await Category.insertMany([
+            { name: 'Technology' },
+            { name: 'Design' },
+            { name: 'Business' },
+            { name: 'Lifestyle' },
+          ]);
+          console.log('Seeded default categories');
+        }
+      } catch (err) {
+        console.warn('Category seeding skipped:', err?.message || err);
+      }
+    })();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

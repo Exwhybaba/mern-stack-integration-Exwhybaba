@@ -16,7 +16,12 @@ const PostSchema = new mongoose.Schema(
     },
     featuredImage: {
       type: String,
-      default: 'default-post.jpg',
+      default: '',
+    },
+    videoUrl: {
+      type: String,
+      default: '',
+      trim: true,
     },
     slug: {
       type: String,
@@ -30,12 +35,12 @@ const PostSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
-      required: true,
+      required: false,
     },
     tags: [String],
     isPublished: {
